@@ -8,30 +8,29 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/register', [RegisteredUserController::class, 'store'])
-                ->middleware('guest')
-                ->name('register');
+// COMO ESTÁ HABILITADO A VERIFICAÇÃO DE E-MAIL ENVIA UM E-MAIL PARA CONFIRMAR O PASSWORD
+Route::post('/register', [RegisteredUserController::class, 'store'])->name('register');
 
-Route::post('/login', [AuthenticatedSessionController::class, 'store'])
-                ->middleware('guest')
-                ->name('login');
+// REALIZA LOGIN GERANDO O ACCESS TOKEN
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login');
 
-Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
-                ->middleware('guest')
-                ->name('password.email');
+// RETORNA UM NOVO ACCESS TOKEN
+Route::post('/refresh', [AuthenticatedSessionController::class, 'refresh'])->name('refresh');
 
-Route::post('/reset-password', [NewPasswordController::class, 'store'])
-                ->middleware('guest')
-                ->name('password.store');
+// EXIBE DADOS DO USUÁRIO LOGADO
+Route::post('/me', [AuthenticatedSessionController::class, 'me'])->middleware('auth:sanctum')->name('me');
 
-Route::get('/verify-email/{id}/{hash}', VerifyEmailController::class)
-                ->middleware(['auth', 'signed', 'throttle:6,1'])
-                ->name('verification.verify');
+// DESTRÓI O TOKEN DE ACESSO
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->middleware('auth:sanctum')->name('logout');
 
-Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-                ->middleware(['auth', 'throttle:6,1'])
-                ->name('verification.send');
+// ENVIA O E-MAIL PARA RECUPERAR A SENHA
+Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
 
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-                ->middleware('auth')
-                ->name('logout');
+// RECEBE OS DADOS QUANDO O USUÁRIO CLICAR EM ALTERAR A SENHA
+Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
+
+// RECEBE OS DADOS QUANDO O USUÁRIO CLICAR EM CONFIRMAR E-MAIL E PREENCHE O email_verified_at
+Route::get('/verify-email/{id}/{hash}', VerifyEmailController::class)->middleware(['auth:sanctum', 'signed', 'throttle:6,1'])->name('verification.verify');
+
+// VERIFICA SE O E-MAIL ESTÁ VALIDADO SE NÃO ESTIVER ENVIA OUTRO
+Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])->middleware(['auth:sanctum', 'throttle:6,1'])->name('verification.send');
