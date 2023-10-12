@@ -1,6 +1,6 @@
-## Breeze API com linguagem pt_BR e confirmação de e-mail
+## Breeze API com confirmação de e-mail e tradução pata PT-BR
 
-**Páginas modificadas**
+**Páginas modificadas para a API**
 
 -   App\Http\Controllers\Auth\AuthenticatedSessionController.php
 -   App\Http\Controllers\Auth\EmailVerificationNotificationController.php
@@ -16,3 +16,9 @@
 -   routes\api.php
 -   routes\auth.php
 -   routes\web.php
+
+<br>
+
+**Páginas modificadas para a tradução**
+
+-   lang/\*
