@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -15,6 +16,9 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
         $user = auth()->user();
         $user->tokens()->delete();
+        if ($this->isInternal($request)) {
+            $request->session()->regenerate();
+        }
 
         return response()->json([
             'success' => true,
@@ -64,7 +68,21 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): JsonResponse
     {
         $request->user()->tokens()->delete();
+        if ($this->isInternal($request)) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+        }
 
         return response()->json(['success' => true, 'message' => 'User logged out!'], 200);
+    }
+
+    private function isInternal(Request $request): string
+    {
+        $client = $request->header('Client');
+        if (! empty($client) && $client === 'external') {
+            return false;
+        }
+
+        return true;
     }
 }
